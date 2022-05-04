@@ -40,7 +40,7 @@ namespace Assets.CodeBase.GameField.FieldCleaner
             for (int i = 0; i < _cleanerHolder.BlocksToClean.Count; i++)
             {
                 if (i % 10 == 0)
-                    AudioSource.PlayOneShot(DestroyAudio, 0.2f);
+                    AudioSource.PlayOneShot(DestroyAudio, 0.21f);
 
                 GameObject block = _cleanerHolder.BlocksToClean[i];
                 Destroy(block);
