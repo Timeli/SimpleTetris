@@ -13,7 +13,7 @@ namespace Assets.CodeBase.FigureControls
 
         private const float MinimalFallingSpeed = 0.05f;
         private static float _fallingSpeed;
-        
+
         public Transform BottomChecker;
 
         public IInputService Input;
@@ -23,7 +23,8 @@ namespace Assets.CodeBase.FigureControls
 
         private float _currentSpeed;
         private float _timeCounter;
-        private bool _isFall = true;
+        private bool _isFalling = true;
+        private static bool _isAccelerateAvalible = true;
 
         public ContactFilter2D contactFilter;
         private readonly List<Collider2D> _overlapColliders = new();
@@ -58,7 +59,10 @@ namespace Assets.CodeBase.FigureControls
 
         private void Accelerate()
         {
-            if (Input.IsAcceleration())
+            if (Input.IsAcceleration() == false)
+                _isAccelerateAvalible = true;
+
+            if (Input.IsAcceleration() && _isAccelerateAvalible)
             {
                 if (_currentSpeed != Constants.AccelerationSpeed)
                 {
@@ -66,20 +70,19 @@ namespace Assets.CodeBase.FigureControls
                     _particleActivator.Activate();
                 }
             }
-            else
+            else if (_currentSpeed != _fallingSpeed)
             {
-                if (_currentSpeed != _fallingSpeed)
-                {
-                    _currentSpeed = _fallingSpeed;
-                    _particleActivator.Deactivate();
-                }
+                _currentSpeed = _fallingSpeed;
+                _particleActivator.Deactivate();
             }
+
+            
         }
 
         private void FallDown()
         {
             _timeCounter += Time.deltaTime;
-            if (_isFall)
+            if (_isFalling)
             {
                 if (_timeCounter >= _currentSpeed)
                 {
@@ -98,13 +101,13 @@ namespace Assets.CodeBase.FigureControls
                     _collidedCounter = Constants.CollidedBeforeStop;
 
                 _collidedCounter++;
-                _isFall = false;
+                _isFalling = false;
                 _particleActivator.Deactivate();
                 StopMoving();
             }
             else
             {
-                _isFall = true;
+                _isFalling = true;
                 _collidedCounter = 0;
             }
         }
@@ -112,7 +115,10 @@ namespace Assets.CodeBase.FigureControls
         private void StopMoving()
         {
             if (_collidedCounter >= Constants.CollidedBeforeStop)
+            {
+                _isAccelerateAvalible = false;
                 Stopped?.Invoke();
+            }
         }
 
         private void Falling() =>
